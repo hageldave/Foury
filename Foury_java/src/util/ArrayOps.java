@@ -1,6 +1,7 @@
 package util;
 
 import java.util.Arrays;
+import static util.ArrayPool.*;
 
 public class ArrayOps {
 
@@ -49,7 +50,7 @@ public class ArrayOps {
 	
 	public static double[] normalize(double[] array, double[] result){
 		if(result == null)
-			result = new double[array.length]; 
+			result = alloc(array.length); 
 		if(array != result){
 			System.arraycopy(array, 0, result, 0, array.length);
 			array = result;
@@ -63,7 +64,7 @@ public class ArrayOps {
 	
 	public static double[] logarithmize(double[] array, double[] result){
 		if(result == null)
-			result = new double[array.length]; 
+			result = alloc(array.length); 
 		if(array != result){
 			System.arraycopy(array, 0, result, 0, array.length);
 			array = result;
@@ -75,7 +76,7 @@ public class ArrayOps {
 	
 	public static double[] complexAbs(double[] real, double[] imag, double[] result){
 		if(result == null)
-			result = new double[real.length]; 
+			result = alloc(real.length); 
 		if(real != result){
 			System.arraycopy(real, 0, result, 0, real.length);
 			real = result;
@@ -87,7 +88,7 @@ public class ArrayOps {
 	
 	public static double[] complexSquare(double[] real, double[] imag, double[] result){
 		if(result == null)
-			result = new double[real.length]; 
+			result = alloc(real.length); 
 		if(real != result){
 			System.arraycopy(real, 0, result, 0, real.length);
 			real = result;
@@ -99,7 +100,7 @@ public class ArrayOps {
 	
 	public static double[] mult(double[] a, double[] b, double[] result){
 		if(result == null)
-			result = new double[a.length]; 
+			result = alloc(a.length); 
 		if(a != result){
 			System.arraycopy(a, 0, result, 0, a.length);
 			a = result;
@@ -111,13 +112,13 @@ public class ArrayOps {
 	
 	public static void complexMult(double[] realA, double[] imagA, double[] realB, double[] imagB, double[] realR, double[] imagR){
 		if(realR == null)
-			realR = new double[realA.length]; 
+			realR = alloc(realA.length); 
 		if(realA != realR){
 			System.arraycopy(realA, 0, realR, 0, realA.length);
 			realA = realR;
 		}
 		if(imagR == null)
-			imagR = new double[imagA.length]; 
+			imagR = alloc(imagA.length); 
 		if(imagA != realR){
 			System.arraycopy(imagA, 0, imagR, 0, imagA.length);
 			imagA = imagR;
@@ -134,7 +135,7 @@ public class ArrayOps {
 	
 	public static double[] scale(double[] array, double factor, double[] result){
 		if(result == null)
-			result = new double[array.length]; 
+			result = alloc(array.length); 
 		if(array != result){
 			System.arraycopy(array, 0, result, 0, array.length);
 			array = result;
@@ -146,47 +147,55 @@ public class ArrayOps {
 
 	public static double[] transpose(double[] array, int size, double[] result, double[] cpy){
 		if(result == null)
-			result = new double[array.length]; 
+			result = alloc(array.length); 
 		if(array != result){
 			System.arraycopy(array, 0, result, 0, array.length);
 			array = result;
 		}
-		
-		if(cpy == null || cpy == array)
-			cpy = Arrays.copyOf(array, array.length);
+		boolean tempCpy = false;
+		if(cpy == null || cpy == array){
+			cpy = arrayCopy(array);
+			tempCpy = true;
+		}
 		
 		for(int y = 0; y < size; y++)
 			for(int x = 0; x < size; x++)
 				array[y*size+x] = cpy[x*size+y];
+		if(tempCpy)
+			free(cpy);
 		return array;
 	}
 
 	
 	public static double[] shift(double[] array, int shift, int offset, int size, double[] result, double[] cpy){
 		if(result == null)
-			result = new double[array.length]; 
+			result = alloc(array.length); 
 		if(array != result){
 			System.arraycopy(array, 0, result, 0, array.length);
 			array = result;
 		}
-		
-		if(cpy == null || cpy == array)
-			cpy = Arrays.copyOf(array, array.length);
+		boolean tempCpy = false;
+		if(cpy == null || cpy == array){
+			cpy = arrayCopy(array);
+			tempCpy = true;
+		}
 		
 		for(int i = 0; i < size; i++){
 			array[(offset+((i+shift)%size))%array.length] = cpy[(offset+i)%array.length];
 		}
+		if(tempCpy)
+			free(cpy);
 		return array;
 	}
 
 	public static double[] shift2D(double[] array, int xShift, int yShift, int size, double[] result){
 		if(result == null)
-			result = new double[array.length]; 
+			result = alloc(array.length); 
 		if(array != result){
 			System.arraycopy(array, 0, result, 0, array.length);
 			array = result;
 		}
-		double[] cpy = array.clone();
+		double[] cpy = arrayCopy(array);
 		// shift rows first
 		for(int i = 0; i < size; i++)
 			shift(array, xShift, i*size, size, array, cpy);
@@ -198,33 +207,42 @@ public class ArrayOps {
 		System.arraycopy(array, 0, cpy, 0, array.length);
 		transpose(array, size, array,cpy);
 		
+		free(cpy);
+		
 		return array;
 	}
 	
 	public static double[] reverse(double[] array, int offset, int size, double[] result, double[] cpy){
 		if(result == null)
-			result = new double[array.length]; 
+			result = alloc(array.length); 
 		if(array != result){
 			System.arraycopy(array, 0, result, 0, array.length);
 			array = result;
 		}
 		
-		if(cpy == null || cpy == array)
-			cpy = Arrays.copyOf(array, array.length);
+		boolean tempCpy = false;
+		if(cpy == null || cpy == array){
+			cpy = arrayCopy(array);
+			tempCpy = true;
+		}
 		
 		for(int i = 0; i < size; i++)
 			array[offset+i] = cpy[offset+size-i-1];
+		
+		if(tempCpy)
+			free(cpy);
+		
 		return array;
 	}
 	
 	public static double[] reverse2D(double[] array, int size, double[] result){
 		if(result == null)
-			result = new double[array.length]; 
+			result = alloc(array.length); 
 		if(array != result){
 			System.arraycopy(array, 0, result, 0, array.length);
 			array = result;
 		}
-		double[] cpy = array.clone();
+		double[] cpy = arrayCopy(array);
 		// rows first
 		for(int i= 0; i < size; i++)
 			reverse(array, i*size, size, array, cpy);
@@ -236,13 +254,15 @@ public class ArrayOps {
 		System.arraycopy(array, 0, cpy, 0, array.length);
 		transpose(array, size, array, cpy);
 		
+		free(cpy);
+		
 		return result;
 	}
 	
 	public static double[] paddArray2D(double[] array, int size, int targetSize, double value){
 		int h = array.length/size;
 		int w = size;
-		double[] target = new double[targetSize*targetSize];
+		double[] target = alloc(targetSize*targetSize);
 		for(int y = 0; y < h; y++){
 			for(int x = 0; x < w; x++){
 				target[y*targetSize+x] = array[y*size+x];
@@ -281,13 +301,14 @@ public class ArrayOps {
 	}
 
 	public static String toString(double[] array, int offset, int size){
-		String s = "[";
+		StringBuilder s = new StringBuilder(size*4);
+		s.append("[");
 		for(int i = 0; i < size; i++){
-			s += String.valueOf(array[offset+i]);
+			s.append(String.valueOf(array[offset+i]));
 			if(i < size-1)
-				s+=", ";
+				s.append(", ");
 		}
-		s += "]";
-		return s;
+		s.append("]");
+		return s.toString();
 	}
 }

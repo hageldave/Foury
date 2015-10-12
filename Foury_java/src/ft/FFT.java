@@ -2,6 +2,7 @@ package ft;
 
 import util.Pair;
 
+@Deprecated
 public class FFT {
 	
 	static final double PI = Math.PI;

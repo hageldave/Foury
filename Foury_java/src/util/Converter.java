@@ -1,11 +1,12 @@
 package util;
 
 import java.awt.image.BufferedImage;
+import static util.ArrayPool.*;
 
 public class Converter {
 
 	public static double[] arrayFromBufferedImage(BufferedImage img){
-		double[] array = new double[img.getWidth()*img.getHeight()];
+		double[] array = alloc(img.getWidth()*img.getHeight());
 		int width = img.getWidth();
 		int height = img.getHeight();
 		for(int y = 0; y < height; y++)

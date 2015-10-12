@@ -11,6 +11,7 @@ import util.ImageLoader;
 import util.Pair;
 
 import static util.ArrayOps.*;
+import static util.ArrayPool.*;
 
 public class RotationDetectionTest {
 	static final int imgType = BufferedImage.TYPE_BYTE_GRAY;
@@ -21,11 +22,11 @@ public class RotationDetectionTest {
 		
 		Pair<double[], Integer> real_ = loadDArrayPow2FromImgFile(inputName);
 		double[] real = real_.val1;
-		double[] imag = new double[real.length];
+		double[] imag = alloc(real.length, 0);
 		Pair<double[], Integer> real2_ = loadDArrayPow2FromImgFile(inputName2);
 		double[] real2 = real2_.val1;
-		double[] imag2 = new double[real2.length];
-		double[] result = new double[real.length];
+		double[] imag2 = alloc(real2.length, 0);
+		double[] result = alloc(real.length);
 		int size = real_.val2;
 		
 		long time = System.currentTimeMillis();
@@ -43,12 +44,12 @@ public class RotationDetectionTest {
 		shift2D(real, size/2, size/2, size, real);
 		shift2D(real2, size/2, size/2, size, real2);
 		System.out.format("%s: %dms%n", "shift",System.currentTimeMillis()-time);
-//		
+		
 //		ImageFrame.display(Converter.imageFromArray(normalize(logarithmize(real, null), null), size, imgType), "power spec 1");
 //		ImageFrame.display(Converter.imageFromArray(normalize(logarithmize(real2, null), null), size, imgType), "power spec 2");
 		// polar transform
-		polarTransform(real.clone(), real, size);
-		polarTransform(real2.clone(), real2, size);
+		polarTransform(real, real, size);
+		polarTransform(real2, real2, size);
 		System.out.format("%s: %dms%n", "polar",System.currentTimeMillis()-time);
 		
 //		ImageFrame.display(Converter.imageFromArray(normalize(logarithmize(real, null), null), size, imgType), "polar 1");
@@ -110,7 +111,13 @@ public class RotationDetectionTest {
 		return new Pair<double[], Integer>(array, size);
 	}
 	
-	static void polarTransform(double[] array, double[] polar, int size){
+	static double[] polarTransform(double[] array, double[] polar, int size){
+		boolean tmpArray = false;
+		if(polar == null || array == polar){
+			polar = array;
+			array = arrayCopy(array);
+			tmpArray = true;
+		}
 		for(int l = 0; l < size; l++){
 			double len = (l*1.0)/size; 
 			for(int a = 0; a < size; a++){
@@ -120,6 +127,10 @@ public class RotationDetectionTest {
 				polar[l*size+a] = ArrayOps.interpolate2D(array, size, (x+1)/2, (y+1)/2);
 			}
 		}
+		if(tmpArray)
+			free(array);
+		
+		return polar;
 	}
 	
 	static int interpolate(double a, int range){

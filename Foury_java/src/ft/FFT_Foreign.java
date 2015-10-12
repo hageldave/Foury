@@ -23,6 +23,8 @@ package ft;
  *   Software.
  */
 
+import static util.ArrayPool.*;
+
 
 public class FFT_Foreign {
 	
@@ -65,8 +67,8 @@ public class FFT_Foreign {
 		int levels = 31 - Integer.numberOfLeadingZeros(n);  // Equal to floor(log2(n))
 		if (1 << levels != n)
 			throw new IllegalArgumentException("Length is not a power of 2");
-		double[] cosTable = new double[n / 2];
-		double[] sinTable = new double[n / 2];
+		double[] cosTable = alloc(n / 2);
+		double[] sinTable = alloc(n / 2);
 		for (int i = 0; i < n / 2; i++) {
 			cosTable[i] = Math.cos(2 * Math.PI * i / n);
 			sinTable[i] = Math.sin(2 * Math.PI * i / n);
@@ -102,6 +104,9 @@ public class FFT_Foreign {
 			if (size == n)  // Prevent overflow in 'size *= 2'
 				break;
 		}
+		
+		free(sinTable);
+		free(cosTable);
 	}
 	
 	
@@ -114,8 +119,8 @@ public class FFT_Foreign {
 		int levels = 31 - Integer.numberOfLeadingZeros(n);  // Equal to floor(log2(n))
 		if (1 << levels != n)
 			throw new IllegalArgumentException("Length is not a power of 2");
-		double[] cosTable = new double[n / 2];
-		double[] sinTable = new double[n / 2];
+		double[] cosTable = alloc(n / 2);
+		double[] sinTable = alloc(n / 2);
 		for (int i = 0; i < n / 2; i++) {
 			cosTable[i] = Math.cos(2 * Math.PI * i / n);
 			sinTable[i] = Math.sin(2 * Math.PI * i / n);
@@ -151,6 +156,10 @@ public class FFT_Foreign {
 			if (size == n)  // Prevent overflow in 'size *= 2'
 				break;
 		}
+		
+		free(sinTable);
+		free(cosTable);
+		
 	}
 	
 	
@@ -171,8 +180,8 @@ public class FFT_Foreign {
 		int m = Integer.highestOneBit(n * 2 + 1) << 1;
 		
 		// Trignometric tables
-		double[] cosTable = new double[n];
-		double[] sinTable = new double[n];
+		double[] cosTable = alloc(n);
+		double[] sinTable = alloc(n);
 		for (int i = 0; i < n; i++) {
 			int j = (int)((long)i * i % (n * 2));  // This is more accurate than j = i * i
 			cosTable[i] = Math.cos(Math.PI * j / n);
@@ -180,14 +189,14 @@ public class FFT_Foreign {
 		}
 		
 		// Temporary vectors and preprocessing
-		double[] areal = new double[m];
-		double[] aimag = new double[m];
+		double[] areal = alloc(m);
+		double[] aimag = alloc(m);
 		for (int i = 0; i < n; i++) {
 			areal[i] =  real[i] * cosTable[i] + imag[i] * sinTable[i];
 			aimag[i] = -real[i] * sinTable[i] + imag[i] * cosTable[i];
 		}
-		double[] breal = new double[m];
-		double[] bimag = new double[m];
+		double[] breal = alloc(m);
+		double[] bimag = alloc(m);
 		breal[0] = cosTable[0];
 		bimag[0] = sinTable[0];
 		for (int i = 1; i < n; i++) {
@@ -196,8 +205,8 @@ public class FFT_Foreign {
 		}
 		
 		// Convolution
-		double[] creal = new double[m];
-		double[] cimag = new double[m];
+		double[] creal = alloc(m);
+		double[] cimag = alloc(m);
 		convolve(areal, aimag, breal, bimag, creal, cimag);
 		
 		// Postprocessing
@@ -205,6 +214,9 @@ public class FFT_Foreign {
 			real[i] =  creal[i] * cosTable[i] + cimag[i] * sinTable[i];
 			imag[i] = -creal[i] * sinTable[i] + cimag[i] * cosTable[i];
 		}
+		
+		free(cosTable);
+		free(sinTable);
 	}
 	
 	
@@ -215,7 +227,7 @@ public class FFT_Foreign {
 		if (x.length != y.length || x.length != out.length)
 			throw new IllegalArgumentException("Mismatched lengths");
 		int n = x.length;
-		convolve(x, new double[n], y, new double[n], out, new double[n]);
+		convolve(x, alloc(n,0), y, alloc(n,0), out, alloc(n));
 	}
 	
 	

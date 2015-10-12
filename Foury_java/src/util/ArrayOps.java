@@ -287,6 +287,22 @@ public class ArrayOps {
 		return pow;
 	}
 	
+	public static double[] mirrorOnSides2D(double[] array, int size, double[] result){
+		
+		int size2 = size*2;
+		if(result == null)
+			result = alloc(size2*size2);
+		for(int y = 0; y < size; y++)
+			for(int x = 0; x < size; x++){
+				result[y*size2+x] = array[y*size+x];
+				result[y*size2+size2-x-1] = array[y*size+x];
+				result[size2*size2 - y*size2 -x-1] = array[y*size+x];
+				result[size2*size2 - y*size2 -size2+x] = array[y*size+x];
+			}
+		return result;
+		
+	}
+	
 	/** x and y element of [0..1[ */
 	public static double interpolate2D(double[] array, int size, double x, double y){
 		double w = size-1;

@@ -59,11 +59,39 @@ public class RotationDetectionTest {
 		System.out.format("%s: %dms%n", "correlate",System.currentTimeMillis()-time);
 		Pair<Integer, Integer> max = ArrayOps.findMax2D(result, size);
 		
-		time = System.currentTimeMillis() - time;
-		
 //		ImageFrame.display(Converter.imageFromArray(normalize(logarithmize(result, result),result), size, imgType), String.format("cross corr (%.3f,%.3f)",max.val1*1.0/size,max.val2*1.0/size));
 		double degree = max.val1*360.0/size;
-		System.out.format("angle of %f or %f degree, [%.3fs]", degree, degree-360, time/1000.0);
+		System.out.format("angle of %f or %f degree, [%.3fs]%n", degree, degree-360, (System.currentTimeMillis()-time)/1000.0);
+		
+		// free resources
+		free(result);
+		free(real);
+		free(real2);
+		free(imag);
+		free(imag2);
+		// reload images
+		real = loadDArrayPow2FromImgFile(inputName).val1;
+		real2 = loadDArrayPow2FromImgFile(inputName2).val1;
+		// padd images for rotation
+		int targetSize = size*2;
+		real = paddArray2D(real, size, targetSize, 0);
+		real2 = paddArray2D(real2, size, targetSize, 0);
+		// shift to middle
+		shift2D(real, size/2, size/2, targetSize, real);
+		shift2D(real2, size/2, size/2, targetSize, real2);
+		// rotate
+		rotate(real2, real2, targetSize, -max.val1*2*Math.PI/size, targetSize/2, targetSize/2);
+		
+//		ImageFrame.display(Converter.imageFromArray(real, targetSize, imgType), "original");
+//		ImageFrame.display(Converter.imageFromArray(real2, targetSize, imgType), "back rotation");
+		
+		// correllation
+		result = alloc(real.length);
+		correlate(real, real2, result, targetSize);
+		Pair<Integer, Integer> max2 = findMax2D(result, targetSize);
+		System.out.format("translation of %s, [%.3fs]%n",max2, (System.currentTimeMillis()-time)/1000.0);
+		
+//		ImageFrame.display(Converter.imageFromArray(normalize(logarithmize(result, result),result), targetSize, imgType), "cross corr of transl.");
 	}
 	
 	static BufferedImage imageOfFourier(double[] array, int size){
@@ -85,7 +113,7 @@ public class RotationDetectionTest {
 	}
 	
 	static void convolve(double[] real1, double[] real2, double[] result, int size){
-		convolve(real1, new double[real1.length], real2, new double[real2.length], result, new double[result.length], size);
+		convolve(real1, alloc(real1.length,0), real2, alloc(real2.length,0), result, alloc(result.length), size);
 	}
 	
 	static void correlate(double[] real1, double[] imag1, double[] real2, double[] imag2, double[] realR, double[] imagR, int size){
@@ -131,6 +159,39 @@ public class RotationDetectionTest {
 			free(array);
 		
 		return polar;
+	}
+	
+	static double[] rotate(double[] array, double[] result, int size, double angle, int x0, int y0){
+		boolean tmpArray = false;
+		if(result == null || result == array){
+			result = array;
+			array = arrayCopy(array);
+		}
+		
+		double sin = Math.sin(-angle);
+		double cos = Math.cos(-angle);
+		for(int y = 0; y < size; y++){
+			for(int x = 0; x < size; x++){
+				int x_ = x-x0;
+				int y_ = y-y0;
+				/* cos -sin *
+				 * sin  cos */
+				double tx = x_*cos - y_*sin  +x0;
+				double ty = x_*sin + y_*cos  +y0;
+				
+				if(tx < 0 || tx >= size || ty < 0 || ty >= size){
+					// out of img
+					result[y*size+x] = 0;
+				} else {
+					result[y*size+x] = array[((int)ty)*size+((int)tx)];
+				}
+			}
+		}
+		
+		if(tmpArray)
+			free(array);
+		
+		return result;
 	}
 	
 	static int interpolate(double a, int range){

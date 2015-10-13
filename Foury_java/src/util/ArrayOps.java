@@ -48,6 +48,15 @@ public class ArrayOps {
 		return minIdx;
 	}
 	
+	public static double[] difference(double[] a, double[] b, double[] result){
+		if(result == null){
+			result = alloc(a.length);
+		}
+		for(int i = 0; i < a.length; i++)
+			result[i] = a[i]-b[i];
+		return result;
+	}
+	
 	public static double[] normalize(double[] array, double[] result){
 		if(result == null)
 			result = alloc(array.length); 

@@ -18,8 +18,8 @@ public class RotationDetectionTest {
 	static final int imgType = BufferedImage.TYPE_BYTE_GRAY;
 	
 	public static void main(String[] args) {
-		String inputName = "res/h1.png";
-		String inputName2 = "res/h2.png";
+		String inputName = "res/brushes1.png";
+		String inputName2 = "res/brushes2.png";
 		
 		Pair<double[], Integer> real_ = loadDArrayPow2FromImgFile(inputName);
 		double[] real = real_.val1;

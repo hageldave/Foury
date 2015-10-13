@@ -99,7 +99,7 @@ public class ImageFrame extends JFrame {
 		this.panel.setBackground(color);
 	}
 	
-	public static void display(final BufferedImage img, String title){
+	public static void display(final BufferedImage img, final String title){
 		SwingUtilities.invokeLater( new Runnable() {
 			
 			@Override

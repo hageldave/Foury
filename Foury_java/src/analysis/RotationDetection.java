@@ -37,6 +37,11 @@ public class RotationDetection {
 		polarTransform(real, real, size, 1.0);
 		polarTransform(real2, real2, size, 1.0);
 		System.out.format("%s: %dms%n", "polar",System.currentTimeMillis()-time);
+		
+		double[] band = makeBandKernel(size, 1, 0.5);
+		double[] bandcpy = arrayCopy(band);
+		convolve(real, band, real, size);
+		convolve(real2, bandcpy, real2, size);
 
 		displayLogNorm(real, size, "polar 1");
 		displayLogNorm(real2, size, "polar 2");

@@ -25,7 +25,8 @@ public class Converter {
 	}
 	
 	private static double luminance(int rgb){
-		return ((rgb & 0xff) + ((rgb >> 8)& 0xff)*6 + ((rgb >> 16)&0xff)*3)/(2550.0);
+//		return ((rgb & 0xff) + ((rgb >> 8)& 0xff)*6 + ((rgb >> 16)&0xff)*3)/(2550.0);
+		return ((rgb & 0xff) + ((rgb >> 8)& 0xff) + ((rgb >> 16)&0xff))/(3*255.0);
 	}
 	
 	private static int rgbFromDouble(double x){

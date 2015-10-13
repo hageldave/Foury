@@ -1,6 +1,6 @@
 package util;
 
-import java.util.Arrays;
+import java.awt.Point;
 import static util.ArrayPool.*;
 
 public class ArrayOps {
@@ -31,9 +31,9 @@ public class ArrayOps {
 		return maxIdx;
 	}
 	
-	public static Pair<Integer, Integer> findMax2D(double[] array, int width){
+	public static Point findMax2D(double[] array, int width){
 		int idx = findMax(array);
-		return new Pair<Integer, Integer>(idx%width, idx/width);
+		return new Point(idx%width, idx/width);
 	}
 	
 	public static int findMin(double[] array){

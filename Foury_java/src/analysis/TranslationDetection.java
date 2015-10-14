@@ -2,8 +2,6 @@ package analysis;
 
 import java.awt.Point;
 
-import util.ArrayOps;
-
 import static util.ArrayOps.*;
 import static util.ImageOps.*;
 

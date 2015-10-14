@@ -83,17 +83,20 @@ public class ImageOps {
 	}
 	
 	public static void correlate(double[] real1, double[] imag1, double[] real2, double[] imag2, double[] realR, double[] imagR, int size){
-		ArrayOps.reverse2D(real2, size, real2);
-		ArrayOps.reverse2D(imag2, size, imag2);
-		convolve(real1, imag1, real2, imag2, realR, imagR, size);
-		ArrayOps.reverse2D(realR, size, realR);
-		ArrayOps.reverse2D(imagR, size, imagR);
+		ft.FFT2D.doFFT2D(real1, imag1, size);
+		ft.FFT2D.doFFT2D(real2, imag2, size);
+		scale(imag1, -1, imag1);
+		ArrayOps.complexMult(real1, imag1, real2, imag2, realR, imagR);
+		ArrayOps.scale(imagR, -1, imagR);
+		ft.FFT2D.doFFT2D(realR, imagR, size);
 	}
 	
 	public static void correlate(double[] real1, double[] real2, double[] result, int size){
-		ArrayOps.reverse2D(real2, size, real2);
-		convolve(real1, real2, result, size);
-		ArrayOps.reverse2D(result, size, result);
+		double[] imag1 = alloc(real1.length,0);
+		double[] imag2 = alloc(real1.length,0);
+		double[] imagR = alloc(real1.length);
+		correlate(real1, imag1, real2, imag2, result, imagR, size);
+		free(imag1);free(imag2);free(imagR);
 	}
 	
 	public static double[] fadeOutEdges(double[] array, double[] result, int size, double fadeThresh){

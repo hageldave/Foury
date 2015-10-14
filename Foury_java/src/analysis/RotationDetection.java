@@ -38,26 +38,45 @@ public class RotationDetection {
 		polarTransform(real2, real2, size, 1.0);
 		System.out.format("%s: %dms%n", "polar",System.currentTimeMillis()-time);
 		
-		double[] band = makeBandKernel(size, 1, 0.5);
-		double[] bandcpy = arrayCopy(band);
-		convolve(real, band, real, size);
-		convolve(real2, bandcpy, real2, size);
+//		double[] band = makeBandKernel(size, 2, 1);
+//		double[] bandcpy = arrayCopy(band);
+//		convolve(real, band, real, size);
+//		convolve(real2, bandcpy, real2, size);
 
 		displayLogNorm(real, size, "polar 1");
 		displayLogNorm(real2, size, "polar 2");
 		
 		// translation of polar
+//		logarithmize(real, real);
+//		logarithmize(real2, real2);
 		Point p = TranslationDetection.calculateTranslation(real, real2, size);
+		int min = p.x;
+//		double[] sums = alloc(size);
+//		double[] diff = alloc(real.length);
+//		for(int i = 0; i < size; i++){
+//			difference(real, real2, diff);
+//			sums[i] = sumAbs(diff, size*10, diff.length/2);
+//			shift2D(real, 1, 0, size, real);
+//		}
+//		int min = findMin(sums);
+//		displayLogNorm(sums, size, "sums");
 		System.out.format("%s: %dms%n", "correlate",System.currentTimeMillis()-time);
 
 //		ImageFrame.display(Converter.imageFromArray(normalize(logarithmize(result, result),result), size, imgType), String.format("cross corr (%.3f,%.3f)",max.val1*1.0/size,max.val2*1.0/size));
-		double degree = p.x*360.0/size;
+		double degree = min*360.0/size;
 		System.out.format("angle of %f or %f degree, [%.3fs]%n", degree, degree-360, (System.currentTimeMillis()-time)/1000.0);
 		
 		free(imag);
 		free(imag2);
 		
-		return p.x * Math.PI*2.0 / size;
+		return (min * Math.PI*2.0) / size;
+	}
+	
+	static double sumAbs(double[] array, int offset, int size){
+		double sum = 0;
+		for(int i = offset; i < offset+size; i++)
+			sum += Math.abs(array[i]);
+		return sum;
 	}
 	
 }

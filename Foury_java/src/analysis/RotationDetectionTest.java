@@ -18,8 +18,8 @@ public class RotationDetectionTest {
 	static final int imgType = BufferedImage.TYPE_BYTE_GRAY;
 	
 	public static void main(String[] args) {
-		String inputName = "res/brushes1.png";
-		String inputName2 = "res/brushes2.png";
+		String inputName = "res/h1.png";
+		String inputName2 = "res/h2.png";
 		
 		Pair<double[], Integer> real_ = loadDArrayPow2FromImgFile(inputName);
 		double[] real = real_.val1;
@@ -27,7 +27,8 @@ public class RotationDetectionTest {
 		double[] real2 = real2_.val1;
 		int size = real_.val2;
 		
-		display(real, size, null);
+		displayNorm(real, size, inputName);
+		displayNorm(real2, size, inputName2);
 		
 		long time = System.currentTimeMillis();
 		double rot = RotationDetection.calculateRotation(real, real2, size);
@@ -48,7 +49,11 @@ public class RotationDetectionTest {
 		rotate(real2, real2, targetSize, -rot, targetSize/2, targetSize/2);
 		display(real, targetSize, "original");
 		display(real2, targetSize, "back rotation");
+		double[] real2Cpy = arrayCopy(real2);
 		Point p = TranslationDetection.calculateTranslation(real, real2, targetSize);
+		// back translate
+		shift2D(real2Cpy, targetSize-p.x, targetSize-p.y, targetSize, real2Cpy);
+		display(real2Cpy, targetSize, "back translate");
 
 		System.out.format("translation of (%d|%d), [%.3fs]%n",p.x, p.y, (System.currentTimeMillis()-time)/1000.0);
 	}

@@ -52,4 +52,16 @@ public final class ArrayPool {
 		return cpy;
 	}
 	
+	public static void clearCache(final int size){
+		final ArrayPool p = get(size);
+		p.stack.clear();
+		System.gc();
+	}
+	
+	public static void clearCacheAll(){
+		for(ArrayPool p: pools.values())
+			p.stack.clear();
+		System.gc();
+	}
+	
 }

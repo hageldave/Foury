@@ -18,8 +18,8 @@ public class RotationDetectionTest {
 	static final int imgType = BufferedImage.TYPE_BYTE_GRAY;
 	
 	public static void main(String[] args) {
-		String inputName = "res/h1.png";
-		String inputName2 = "res/h2.png";
+		String inputName = "res/brushes1.png";
+		String inputName2 = "res/brushes2.png";
 		
 		Pair<double[], Integer> real_ = loadDArrayPow2FromImgFile(inputName);
 		double[] real = real_.val1;
@@ -50,12 +50,13 @@ public class RotationDetectionTest {
 		display(real, targetSize, "original");
 		display(real2, targetSize, "back rotation");
 		double[] real2Cpy = arrayCopy(real2);
-		Point p = TranslationDetection.calculateTranslation(real, real2, targetSize);
+		Point t = TranslationDetection.calculateTranslation(real, real2, targetSize);
 		// back translate
-		shift2D(real2Cpy, targetSize-p.x, targetSize-p.y, targetSize, real2Cpy);
+		shift2D(real2Cpy, targetSize-t.x, targetSize-t.y, targetSize, real2Cpy);
 		display(real2Cpy, targetSize, "back translate");
-
-		System.out.format("translation of (%d|%d), [%.3fs]%n",p.x, p.y, (System.currentTimeMillis()-time)/1000.0);
+		int xt = Math.abs(t.x) < Math.abs(t.x-targetSize) ? t.x:t.x-targetSize;
+		int yt = Math.abs(t.y) < Math.abs(t.y-targetSize) ? t.y:t.y-targetSize;
+		System.out.format("translation of (%d|%d), [%.3fs]%n", xt, yt, (System.currentTimeMillis()-time)/1000.0);
 	}
 	
 	static BufferedImage imageOfFourier(double[] array, int size){

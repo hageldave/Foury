@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 
 public class ImageOps {
 
-	public static double[] polarTransform(double[] array, double[] polar, int size, double maxRadius){
+	public static double[] polarTransform(double[] array, double[] polar, int size, double startRadius, double maxRadius){
 		boolean tmpArray = false;
 		if(polar == null || array == polar){
 			polar = array;
@@ -16,11 +16,11 @@ public class ImageOps {
 		}
 		
 		for(int l = 0; l < size; l++){
-			double len = ((l*1.0)/size)*maxRadius; 
+			double len = ((l*1.0)/size)*(maxRadius-startRadius); 
 			for(int a = 0; a < size; a++){
 				double angle = ((a*1.0)/(size-1))*2*Math.PI;
-				double x = len*Math.cos(angle);
-				double y = len*Math.sin(angle);
+				double x = (startRadius+len)*Math.cos(angle);
+				double y = (startRadius+len)*Math.sin(angle);
 				polar[l*size+a] = ArrayOps.interpolate2D(array, size, (x+1)/2, (y+1)/2);
 			}
 		}

@@ -34,21 +34,14 @@ public class RotationDetection {
 		displayLogNorm(real, size, "power spec 1");
 		displayLogNorm(real2,size, "power spec 2");
 		// polar transform
-		polarTransform(real, real, size, 1.0);
-		polarTransform(real2, real2, size, 1.0);
+		polarTransform(real, real, size, 0.1, 0.6);
+		polarTransform(real2, real2, size, 0.1, 0.6);
 		System.out.format("%s: %dms%n", "polar",System.currentTimeMillis()-time);
-		
-//		double[] band = makeBandKernel(size, 2, 1);
-//		double[] bandcpy = arrayCopy(band);
-//		convolve(real, band, real, size);
-//		convolve(real2, bandcpy, real2, size);
 
 		displayLogNorm(real, size, "polar 1");
 		displayLogNorm(real2, size, "polar 2");
 		
 		// translation of polar
-//		logarithmize(real, real);
-//		logarithmize(real2, real2);
 		Point p = TranslationDetection.calculateTranslation(real, real2, size);
 		int min = p.x;
 //		double[] sums = alloc(size);

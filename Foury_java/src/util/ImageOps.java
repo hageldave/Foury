@@ -18,7 +18,7 @@ public class ImageOps {
 		for(int l = 0; l < size; l++){
 			double len = ((l*1.0)/size)*(maxRadius-startRadius); 
 			for(int a = 0; a < size; a++){
-				double angle = ((a*1.0)/(size-1))*2*Math.PI;
+				double angle = ((a*1.0)/(size))*2*Math.PI;
 				double x = (startRadius+len)*Math.cos(angle);
 				double y = (startRadius+len)*Math.sin(angle);
 				polar[l*size+a] = ArrayOps.interpolate2D(array, size, (x+1)/2, (y+1)/2);
@@ -28,6 +28,27 @@ public class ImageOps {
 			free(array);
 		
 		return polar;
+	}
+	
+	public static double[] polarTransformAsLine(double[] array, double[] polarLine, int size, double startRadius, double maxRadius, int numRadiusSamples, int numAngleSamples){
+		if(polarLine == null){
+			polarLine = alloc(numAngleSamples);
+		}
+		for(int a = 0; a < numAngleSamples; a++){
+			double angle = ((a*1.0)/(numAngleSamples))*2*Math.PI;
+			double cos = Math.cos(angle);
+			double sin = Math.sin(angle);
+			double sum = 0;
+			for(int s = 0; s < numRadiusSamples; s++){
+				double len = ((s*1.0)/numRadiusSamples)*(maxRadius-startRadius);
+				double x = (startRadius+len)*cos;
+				double y = (startRadius+len)*sin;
+				sum += ArrayOps.interpolate2D(array, size, (x+1)/2, (y+1)/2);
+			}
+			polarLine[a] = sum;
+		}
+		
+		return polarLine;
 	}
 	
 	public static double[] rotate(double[] array, double[] result, int size, double angle, int x0, int y0){
@@ -79,6 +100,23 @@ public class ImageOps {
 		double[] imag2 = alloc(real1.length,0);
 		double[] imagR = alloc(real1.length);
 		convolve(real1, imag1, real2, imag2, result, imagR, size);
+		free(imag1);free(imag2);free(imagR);
+	}
+	
+	public static void correlate1D(double[] real1, double[] imag1, double[] real2, double[] imag2, double[] realR, double[] imagR){
+		ft.FFT_Foreign.transformRadix2(real1, imag1);
+		ft.FFT_Foreign.transformRadix2(real2, imag2);
+		scale(imag1, -1, imag1);
+		ArrayOps.complexMult(real1, imag1, real2, imag2, realR, imagR);
+		ArrayOps.scale(imagR, -1, imagR);
+		ft.FFT_Foreign.transformRadix2(realR, imagR);
+	}
+	
+	public static void correlate1D(double[] real1, double[] real2, double[] result){
+		double[] imag1 = alloc(real1.length,0);
+		double[] imag2 = alloc(real1.length,0);
+		double[] imagR = alloc(real1.length);
+		correlate1D(real1, imag1, real2, imag2, result, imagR);
 		free(imag1);free(imag2);free(imagR);
 	}
 	

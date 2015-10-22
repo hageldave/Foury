@@ -18,45 +18,56 @@ public class RotationDetectionTest {
 	static final int imgType = BufferedImage.TYPE_BYTE_GRAY;
 	
 	public static void main(String[] args) {
-		String inputName = "res/brushes1.png";
-		String inputName2 = "res/brushes2.png";
+//		String inputName1 = "res/crossy1.png";
+//		String inputName2 = "res/crossy2.png";
+//		String inputName1 = "res/brushes1.png";
+//		String inputName2 = "res/brushes2.png";
+//		String inputName1 = "res/h1.png";
+//		String inputName2 = "res/h2.png";
+		String inputName1 = "res/musquare1.png";
+		String inputName2 = "res/musquare2.png";
 		
-		Pair<double[], Integer> real_ = loadDArrayPow2FromImgFile(inputName);
-		double[] real = real_.val1;
+		Pair<double[], Integer> real_ = loadDArrayPow2FromImgFile(inputName1);
+		double[] real1 = real_.val1;
 		Pair<double[], Integer> real2_ = loadDArrayPow2FromImgFile(inputName2);
 		double[] real2 = real2_.val1;
 		int size = real_.val2;
 		
-		displayNorm(real, size, inputName);
+		displayNorm(real1, size, inputName1);
 		displayNorm(real2, size, inputName2);
 		
 		long time = System.currentTimeMillis();
-		double rot = RotationDetection.calculateRotation(real, real2, size);
-		free(real);
+		double rot = RotationDetection.calculateRotation(real1, real2, size);
+		free(real1);
 		free(real2);
 		
 		// reload images
-		real = loadDArrayPow2FromImgFile(inputName).val1;
+		real1 = loadDArrayPow2FromImgFile(inputName1).val1;
 		real2 = loadDArrayPow2FromImgFile(inputName2).val1;
 		// padd images for rotation
 		int targetSize = size*2;
-		real = paddArray2D(real, size, targetSize, 0);
+		real1 = paddArray2D(real1, size, targetSize, 0);
 		real2 = paddArray2D(real2, size, targetSize, 0);
 		// shift by padding
-		shift2D(real, size/2, size/2, targetSize, real);
+		shift2D(real1, size/2, size/2, targetSize, real1);
 		shift2D(real2, size/2, size/2, targetSize, real2);
 		// rotate
 		rotate(real2, real2, targetSize, -rot, targetSize/2, targetSize/2);
-		display(real, targetSize, "original");
+		display(real1, targetSize, "original");
 		display(real2, targetSize, "back rotation");
+		double[] realCpy = arrayCopy(real1);
 		double[] real2Cpy = arrayCopy(real2);
-		Point t = TranslationDetection.calculateTranslation(real, real2, targetSize);
+		Point t = TranslationDetection.calculateTranslation(real1, real2, targetSize);
 		// back translate
 		shift2D(real2Cpy, targetSize-t.x, targetSize-t.y, targetSize, real2Cpy);
 		display(real2Cpy, targetSize, "back translate");
 		int xt = Math.abs(t.x) < Math.abs(t.x-targetSize) ? t.x:t.x-targetSize;
 		int yt = Math.abs(t.y) < Math.abs(t.y-targetSize) ? t.y:t.y-targetSize;
 		System.out.format("translation of (%d|%d), [%.3fs]%n", xt, yt, (System.currentTimeMillis()-time)/1000.0);
+		
+		// difference
+		difference(realCpy, real2Cpy, realCpy);
+		display(realCpy, targetSize, "difference");
 	}
 	
 	static BufferedImage imageOfFourier(double[] array, int size){
